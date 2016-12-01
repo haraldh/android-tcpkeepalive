@@ -1,4 +1,4 @@
-package net.schwiz.eecs780;
+package xyz.hoyer.tcpalive;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -17,15 +17,15 @@ public void onReceive(Context context, Intent intent) {
 	    NetworkInfo networkInfo = conn.getActiveNetworkInfo();
 	    
 		if (networkInfo != null && networkInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
-	        Log.i("EECS780", "connected");
+	        Log.i("TCPKeepAlive", "connected");
 			context.startService(PushService.startIntent(context.getApplicationContext()));
 	    } 
 	    else if(networkInfo != null){
 	    	NetworkInfo.DetailedState state = networkInfo.getDetailedState();
-	    	Log.i("EECS780", state.name());
+	    	Log.i("TCPKeepAlive", state.name());
 	    }
 	    else {
-	        Log.i("EECS780", "lost connection");
+	        Log.i("TCPKeepAlive", "lost connection");
 	        AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 			PendingIntent operation = PendingIntent.getService(context, 0, PushService.pingIntent(context), PendingIntent.FLAG_NO_CREATE);  
 	        if(operation != null){

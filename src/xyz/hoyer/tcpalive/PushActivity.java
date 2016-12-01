@@ -1,11 +1,10 @@
-package net.schwiz.eecs780;
+package xyz.hoyer.tcpalive;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.codebutler.android_websockets.WebSocketClient.Listener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -23,7 +22,6 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,11 +30,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class PushActivity extends Activity {
 
@@ -158,20 +153,9 @@ public class PushActivity extends Activity {
 		}
 		
 		@Override
-		public void newResponse(Response response) {
-			if("add".equals(response.getAction())){
-				((ArrayAdapter<String>)getListAdapter()).add(response.getName());
-				((ArrayAdapter<String>)getListAdapter()).notifyDataSetChanged();
-			}
-			else if("delete".equals(response.getAction())){
-				((ArrayAdapter<String>)getListAdapter()).remove(response.getName());
-				((ArrayAdapter<String>)getListAdapter()).notifyDataSetChanged();
-			}
-			else if("connect".equals(response.getAction())){
-				((ArrayAdapter<String>)getListAdapter()).clear();
-				((ArrayAdapter<String>)getListAdapter()).addAll(response.getList());
-				((ArrayAdapter<String>)getListAdapter()).notifyDataSetInvalidated();
-			}
+		public void newResponse(String response) {
+			((ArrayAdapter<String>)getListAdapter()).add(response);
+			((ArrayAdapter<String>)getListAdapter()).notifyDataSetChanged();
 		}
 		
 		private final class ActionModeString implements ActionMode.Callback{
@@ -190,18 +174,6 @@ public class PushActivity extends Activity {
 
 			@Override
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-				if(item.getItemId() == ACTION_DELETE){
-					if(mService != null && mService.isConnected()){
-						String string = ((ArrayAdapter<String>)getListAdapter()).getItem(mSelection);
-						mService.removeItem(string);
-						((ArrayAdapter<String>)getListAdapter()).remove(string);
-						((ArrayAdapter<String>) getListAdapter()).notifyDataSetChanged();
-						mode.finish();
-					}
-					else {
-						Toast.makeText(getActivity(), "Not connected to push service please try again", Toast.LENGTH_SHORT);
-					}
-				}
 				return true;
 			}
 
@@ -269,19 +241,6 @@ public class PushActivity extends Activity {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						if(text.getText().length() > 0){
-							mSuggestions.add(text.getText().toString());
-							final String item = text.getText().toString();
-							if(mParent.mService != null && mParent.mService.isConnected()){
-								mParent.mService.addItem(item);
-								((ArrayAdapter<String>)mParent.getListAdapter()).add(item);
-								((ArrayAdapter<String>)mParent.getListAdapter()).notifyDataSetChanged();
-								dialog.dismiss();
-							}
-							else {
-								Toast.makeText(getActivity(), "Not connected to push service please try again", Toast.LENGTH_SHORT);
-							}
-						}
 					}
 				});
 				builder.setNegativeButton("Cancel", new OnClickListener() {

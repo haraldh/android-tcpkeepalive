@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.schwiz.eecs780"
+    package="xyz.hoyer.tcpalive"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -17,37 +17,37 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
-        
         <activity
-            android:name="net.schwiz.eecs780.PushActivity"
+            android:name="xyz.hoyer.tcpalive.PushActivity"
             android:launchMode="singleInstance"
-            android:label="EECS780 Pushing" >
+            android:label="TCPKeepAlive Pushing" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+<!--
         <activity
-            android:name="net.schwiz.eecs780.PullingActivity"
-            android:label="EECS780 Pulling" >
+            android:name="xyz.hoyer.tcpaliveer.tcpalive.PullingActivity"
+            android:label="TCPKeepAlive Pulling" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+        <service android:name="PullingService"></service>
+        -->
+
         <receiver 
-            android:name="net.schwiz.eecs780.NetworkReceiver">
+            android:name="xyz.hoyer.tcpalive.NetworkReceiver">
            <intent-filter >
                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                <action android:name="android.intent.action.BOOT_COMPLETED" />
            </intent-filter> 
         </receiver>
-        <service android:name="PullingService"></service>
-        <service android:name="PushService"></service>
+        <service android:name="xyz.hoyer.tcpalive.PushService"></service>
     </application>
 
 </manifest>

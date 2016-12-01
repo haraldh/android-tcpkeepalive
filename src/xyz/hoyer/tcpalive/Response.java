@@ -1,4 +1,4 @@
-package net.schwiz.eecs780;
+package xyz.hoyer.tcpalive;
 
 import java.util.ArrayList;
 
