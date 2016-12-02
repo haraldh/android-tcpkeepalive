@@ -61,8 +61,21 @@ private final static int TCP_KEEPCNT = 6;
             outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            if (socket != null) {
+                try {
+                    socket.close();
+                    this.mListener.onDisconnect(0, "EOF");
+                } catch (IOException a) {
+                    // TODO Auto-generated catch block
+                    a.printStackTrace();
+                }
+            }
+        }
+        if ((! socket.isConnected()) || (socket == null)) {
             this.dodisconnect = true;
             this.connected = false;
+            this.cancel(true);
+            socket = null;
         }
     }
 
@@ -137,7 +150,7 @@ private final static int TCP_KEEPCNT = 6;
                 Log.i("TCPKeepAlive", MessageFormat.format("exec dstAddress {} dstPort {}", dstAddress, Integer.toString(dstPort)));
 
                 socket = new Socket(dstAddress, dstPort);
-                setKeepaliveSocketOptions(socket, 250, 75, 250 / 75);
+                setKeepaliveSocketOptions(socket, 600, 60, 10);
                 if (!socket.isConnected())
                     return null;
                 this.mListener.onConnect();
@@ -202,6 +215,7 @@ private final static int TCP_KEEPCNT = 6;
             this.connected = false;
         }
         this.dodisconnect = false;
+        Log.i("TCPKeepAlive", "Task: EOF");
         return null;
     }
 }

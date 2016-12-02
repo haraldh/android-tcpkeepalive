@@ -21,16 +21,8 @@ public void onReceive(Context context, Intent intent) {
 			context.startService(PushService.startIntent(context.getApplicationContext()));
 	    } 
 	    else if(networkInfo != null){
-			int newtype = networkInfo.getType();
-			if (previousType == -1)
-				previousType = newtype;
-
-			if (previousType != newtype)
-				context.startService(PushService.pingIntent(context.getApplicationContext()));
-
-			previousType = newtype;
-			NetworkInfo.DetailedState state = networkInfo.getDetailedState();
-	    	Log.i("TCPKeepAlive", state.name());
+			context.startService(PushService.pingIntent(context.getApplicationContext()));
+	    	Log.i("TCPKeepAlive", "ping");
 	    }
 	    else {
 	        Log.i("TCPKeepAlive", "lost connection");
