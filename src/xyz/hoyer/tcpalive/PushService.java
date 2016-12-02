@@ -74,11 +74,15 @@ public class PushService extends Service implements TCPAlive.Listener {
 		Log.i("TCPKeepAlive", "PushService start command");
 		if(intent != null) Log.i("TCPKeepAlive", intent.toUri(0));
 		mShutDown = false;
+		if(mClient != null) {
+			if (mClient.isCancelled())
+				mClient = null;
+		}
 		if(mClient == null) {
 			WakeLock clientlock = ((PowerManager)getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TCPKeepAlive");
 			mClient = new TCPAlive("hoyer.xyz", 4242, this, clientlock);
 		}
-		
+
 		if(!mClient.isConnected()) mClient.connect();
 		
 		if(intent != null) {

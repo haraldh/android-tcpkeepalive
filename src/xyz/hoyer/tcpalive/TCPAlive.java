@@ -79,10 +79,9 @@ private final static int TCP_KEEPCNT = 6;
             Log.i("TCPKeepAlive", "Ping: sockect disconnected");
             this.dodisconnect = true;
             this.connected = false;
-            this.cancel(true);
             this.isRunning = false;
             socket = null;
-            this.mListener.onDisconnect(0, "EOF");
+            this.cancel(true);
         }
     }
 
@@ -199,20 +198,17 @@ private final static int TCP_KEEPCNT = 6;
                 e.printStackTrace();
                 response = "UnknownHostException: " + e.toString();
                 Log.e("TCPKeepAlive", response);
-                this.mListener.onDisconnect(0, e.toString());
                 dodisconnect = true;
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 response = "IOException: " + e.toString();
                 Log.e("TCPKeepAlive", response);
-                this.mListener.onDisconnect(0, e.toString());
                 dodisconnect = true;
             } finally {
                 if (socket != null) {
                     try {
                         socket.close();
-                        this.mListener.onDisconnect(0, "EOF");
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -224,6 +220,13 @@ private final static int TCP_KEEPCNT = 6;
         this.dodisconnect = false;
         this.isRunning = false;
         Log.i("TCPKeepAlive", "Task: EOF");
+        this.cancel(false);
         return null;
+    }
+
+    @Override
+    protected void onCancelled() {
+        this.mListener.onDisconnect(0, "EOF");
+        super.onCancelled();
     }
 }
