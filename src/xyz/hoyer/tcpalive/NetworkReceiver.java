@@ -10,7 +10,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 public class NetworkReceiver extends BroadcastReceiver {   
-    
+    	int previousType = -1;
 @Override
 public void onReceive(Context context, Intent intent) {
 	    ConnectivityManager conn =  (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -21,7 +21,15 @@ public void onReceive(Context context, Intent intent) {
 			context.startService(PushService.startIntent(context.getApplicationContext()));
 	    } 
 	    else if(networkInfo != null){
-	    	NetworkInfo.DetailedState state = networkInfo.getDetailedState();
+			int newtype = networkInfo.getType();
+			if (previousType == -1)
+				previousType = newtype;
+
+			if (previousType != newtype)
+				context.startService(PushService.pingIntent(context.getApplicationContext()));
+
+			previousType = newtype;
+			NetworkInfo.DetailedState state = networkInfo.getDetailedState();
 	    	Log.i("TCPKeepAlive", state.name());
 	    }
 	    else {

@@ -35,6 +35,7 @@ private final static int TCP_KEEPCNT = 6;
     boolean dodisconnect;
     boolean isRunning;
     WakeLock wakelock;
+    Socket socket;
 
     public boolean isConnected() {
         return connected;
@@ -47,6 +48,22 @@ private final static int TCP_KEEPCNT = 6;
     public void connect() {
         if (!this.isRunning)
             this.execute();
+    }
+
+    public void send(String ping) {
+        if (this.socket == null)
+            return;
+
+        DataOutputStream outputStream = null;
+        try {
+            outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            outputStream.writeUTF(ping);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.dodisconnect = true;
+            this.connected = false;
+        }
     }
 
     public interface Listener {
@@ -68,6 +85,7 @@ private final static int TCP_KEEPCNT = 6;
         connected = false;
         dodisconnect = false;
         isRunning = false;
+        this.socket = null;
         this.wakelock = wakelock;
         Log.i("TCPKeepAlive", MessageFormat.format("created dstAddress {} dstPort {}", dstAddress, Integer.toString(dstPort)));
     }
@@ -111,7 +129,7 @@ private final static int TCP_KEEPCNT = 6;
     protected Void doInBackground(Void... arg0) {
         isRunning = true;
         this.connected = false;
-        Socket socket = null;
+        this.socket = null;
         boolean dodisconnect = this.dodisconnect;
 
         while (!dodisconnect) {
@@ -129,7 +147,6 @@ private final static int TCP_KEEPCNT = 6;
 
                 int bytesRead;
                 InputStream inputStream = socket.getInputStream();
-                DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
          /*
           * notice: inputStream.read() will block if no data return
           */
@@ -147,6 +164,7 @@ private final static int TCP_KEEPCNT = 6;
                     String formattedDate = sdf.format(date);
                     String toSend = new String(formattedDate + " " + "Client Received " + response);
                     Log.i("TCPKeepAlive", "Sending: " + toSend);
+                    DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                     outputStream.writeUTF(toSend);
                     outputStream.flush();
 

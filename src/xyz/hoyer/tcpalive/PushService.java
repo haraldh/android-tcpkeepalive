@@ -82,12 +82,12 @@ public class PushService extends Service implements TCPAlive.Listener {
 		if(!mClient.isConnected()) mClient.connect();
 		
 		if(intent != null) {
-/*
+
 			if(ACTION_PING.equals(intent.getAction())){
-				if(mClient.isConnected()) mClient.send("{\"action\":\"ping\"}");
+				if(mClient.isConnected()) mClient.send("PING");
 			}
 
-			else */ if(ACTION_SHUT_DOWN.equals(intent.getAction())){
+			else if(ACTION_SHUT_DOWN.equals(intent.getAction())){
 				mShutDown = true;
 				if(mClient.isConnected()) mClient.disconnect();
 			}
