@@ -1,6 +1,8 @@
 package xyz.hoyer.tcpalive;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -126,7 +128,7 @@ private final static int TCP_KEEPCNT = 6;
 
                 int bytesRead;
                 InputStream inputStream = socket.getInputStream();
-                OutputStream outputStream = socket.getOutputStream();
+                DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
          /*
           * notice: inputStream.read() will block if no data return
           */
@@ -142,8 +144,10 @@ private final static int TCP_KEEPCNT = 6;
                     Date date = new Date();
                     SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy h:mm:ss.S");
                     String formattedDate = sdf.format(date);
-
-                    outputStream.write(new String(formattedDate + " " + "Received " + response).getBytes());
+                    String toSend = new String(formattedDate + " " + "Client Received " + response);
+                    Log.i("TCPKeepAlive", "Sending: " + toSend);
+                    outputStream.writeUTF(toSend);
+                    outputStream.flush();
 
                     mListener.onMessage(response);
                     if (dodisconnect)
