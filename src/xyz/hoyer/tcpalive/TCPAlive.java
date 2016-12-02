@@ -54,28 +54,35 @@ private final static int TCP_KEEPCNT = 6;
         if (this.socket == null)
             return;
 
-        DataOutputStream outputStream = null;
-        try {
-            outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-            outputStream.writeUTF(ping);
-            outputStream.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            if (socket != null) {
-                try {
-                    socket.close();
-                    this.mListener.onDisconnect(0, "EOF");
-                } catch (IOException a) {
-                    // TODO Auto-generated catch block
-                    a.printStackTrace();
+        if (socket.isConnected()) {
+            DataOutputStream outputStream = null;
+            try {
+                Log.i("TCPKeepAlive", "sending Ping");
+                outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+                outputStream.writeUTF(ping);
+                outputStream.flush();
+                Log.i("TCPKeepAlive", "Ping sent");
+            } catch (IOException e) {
+                e.printStackTrace();
+                if (socket != null) {
+                    try {
+                        socket.close();
+                        this.mListener.onDisconnect(0, "EOF");
+                    } catch (IOException a) {
+                        // TODO Auto-generated catch block
+                        a.printStackTrace();
+                    }
                 }
             }
         }
         if ((! socket.isConnected()) || (socket == null)) {
+            Log.i("TCPKeepAlive", "Ping: sockect disconnected");
             this.dodisconnect = true;
             this.connected = false;
             this.cancel(true);
+            this.isRunning = false;
             socket = null;
+            this.mListener.onDisconnect(0, "EOF");
         }
     }
 
@@ -140,7 +147,7 @@ private final static int TCP_KEEPCNT = 6;
 
     @Override
     protected Void doInBackground(Void... arg0) {
-        isRunning = true;
+        this.isRunning = true;
         this.connected = false;
         this.socket = null;
         boolean dodisconnect = this.dodisconnect;
@@ -215,6 +222,7 @@ private final static int TCP_KEEPCNT = 6;
             this.connected = false;
         }
         this.dodisconnect = false;
+        this.isRunning = false;
         Log.i("TCPKeepAlive", "Task: EOF");
         return null;
     }

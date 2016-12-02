@@ -150,7 +150,7 @@ public class PushService extends Service implements TCPAlive.Listener {
 	}
 
 	@Override
-	public synchronized void onMessage(String response) {
+	public synchronized void onMessage(final String response) {
 		WakeLock wakelock = ((PowerManager)getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TCPKeepAlive Service");
 		wakelock.acquire();
 		Log.d("TCPKeepAlive", response);

@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -202,12 +199,6 @@ public class PushActivity extends Activity {
 			@Override
 			public void onCreate(Bundle savedInstanceState) {
 				super.onCreate(savedInstanceState);
-				final String json = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("gsuggestions", null);
-				if(json != null){
-					final Gson g = new Gson();
-					final Type type = new TypeToken<HashSet<String>>(){}.getType();
-					mSuggestions = g.fromJson(json, type);
-				}
 				if(mSuggestions == null){
 					mSuggestions = new HashSet<String>();
 				}

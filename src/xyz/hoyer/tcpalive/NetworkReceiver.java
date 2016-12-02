@@ -17,15 +17,15 @@ public void onReceive(Context context, Intent intent) {
 	    NetworkInfo networkInfo = conn.getActiveNetworkInfo();
 	    
 		if (networkInfo != null && networkInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
-	        Log.i("TCPKeepAlive", "connected");
+	        Log.i("TCPKeepAlive", "NetworkReceiver connected");
 			context.startService(PushService.startIntent(context.getApplicationContext()));
 	    } 
 	    else if(networkInfo != null){
 			context.startService(PushService.pingIntent(context.getApplicationContext()));
-	    	Log.i("TCPKeepAlive", "ping");
+	    	Log.i("TCPKeepAlive", "NetworkReceiver ping");
 	    }
 	    else {
-	        Log.i("TCPKeepAlive", "lost connection");
+	        Log.i("TCPKeepAlive", "NetworkReceiver lost connection");
 	        AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 			PendingIntent operation = PendingIntent.getService(context, 0, PushService.pingIntent(context), PendingIntent.FLAG_NO_CREATE);  
 	        if(operation != null){
