@@ -4,12 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.os.AsyncTask;
 import android.os.PowerManager.WakeLock;
@@ -108,63 +111,72 @@ private final static int TCP_KEEPCNT = 6;
         connected = false;
         Socket socket = null;
 
-        try {
-            Log.i("TCPKeepAlive", MessageFormat.format("exec dstAddress {} dstPort {}", dstAddress, Integer.toString(dstPort)));
+        while (!dodisconnect) {
+            try {
+                Log.i("TCPKeepAlive", MessageFormat.format("exec dstAddress {} dstPort {}", dstAddress, Integer.toString(dstPort)));
 
-            socket = new Socket(dstAddress, dstPort);
-            setKeepaliveSocketOptions(socket, 600, 75, 9);
-            if (!socket.isConnected())
-                return null;
-            this.mListener.onConnect();
-            connected = true;
+                socket = new Socket(dstAddress, dstPort);
+                setKeepaliveSocketOptions(socket, 250, 75, 250 / 75);
+                if (!socket.isConnected())
+                    return null;
+                this.mListener.onConnect();
+                connected = true;
 
-            byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[1024];
 
-            int bytesRead;
-            InputStream inputStream = socket.getInputStream();
-
+                int bytesRead;
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream();
          /*
           * notice: inputStream.read() will block if no data return
           */
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                if (!wakelock.isHeld()) {
-                    wakelock.acquire();
-                }
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
-                byteArrayOutputStream.write(buffer, 0, bytesRead);
-                response = byteArrayOutputStream.toString("UTF-8");
-                Log.i("TCPKeepAlive", "Response: " + response);
-                mListener.onMessage(response);
-                if (dodisconnect)
-                    break;
-                wakelock.release();
-            }
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    if (!wakelock.isHeld()) {
+                        wakelock.acquire();
+                    }
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+                    byteArrayOutputStream.write(buffer, 0, bytesRead);
+                    response = byteArrayOutputStream.toString("UTF-8");
+                    Log.i("TCPKeepAlive", "Response: " + response);
 
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            response = "UnknownHostException: " + e.toString();
-            Log.e("TCPKeepAlive", response);
-            this.mListener.onError(e);
+                    Date date = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy h:mm:ss.S");
+                    String formattedDate = sdf.format(date);
 
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            response = "IOException: " + e.toString();
-            Log.e("TCPKeepAlive", response);
-            this.mListener.onError(e);
-        } finally {
-            if (socket != null) {
-                try {
-                    socket.close();
-                    this.mListener.onDisconnect(0, "EOF");
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    outputStream.write(new String(formattedDate + " " + "Received " + response).getBytes());
+
+                    mListener.onMessage(response);
+                    if (dodisconnect)
+                        break;
+                    wakelock.release();
+                }
+
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                response = "UnknownHostException: " + e.toString();
+                Log.e("TCPKeepAlive", response);
+                this.mListener.onError(e);
+                dodisconnect = true;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                response = "IOException: " + e.toString();
+                Log.e("TCPKeepAlive", response);
+                this.mListener.onError(e);
+            } finally {
+                if (socket != null) {
+                    try {
+                        socket.close();
+                        this.mListener.onDisconnect(0, "EOF");
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
+            connected = false;
         }
-        connected = false;
         return null;
     }
 }
