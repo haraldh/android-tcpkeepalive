@@ -110,8 +110,9 @@ private final static int TCP_KEEPCNT = 6;
     @Override
     protected Void doInBackground(Void... arg0) {
         isRunning = true;
-        connected = false;
+        this.connected = false;
         Socket socket = null;
+        boolean dodisconnect = this.dodisconnect;
 
         while (!dodisconnect) {
             try {
@@ -122,7 +123,7 @@ private final static int TCP_KEEPCNT = 6;
                 if (!socket.isConnected())
                     return null;
                 this.mListener.onConnect();
-                connected = true;
+                this.connected = true;
 
                 byte[] buffer = new byte[1024];
 
@@ -160,14 +161,15 @@ private final static int TCP_KEEPCNT = 6;
                 e.printStackTrace();
                 response = "UnknownHostException: " + e.toString();
                 Log.e("TCPKeepAlive", response);
-                this.mListener.onError(e);
+                this.mListener.onDisconnect(0, e.toString());
                 dodisconnect = true;
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 response = "IOException: " + e.toString();
                 Log.e("TCPKeepAlive", response);
-                this.mListener.onError(e);
+                this.mListener.onDisconnect(0, e.toString());
+                dodisconnect = true;
             } finally {
                 if (socket != null) {
                     try {
@@ -179,8 +181,9 @@ private final static int TCP_KEEPCNT = 6;
                     }
                 }
             }
-            connected = false;
+            this.connected = false;
         }
+        this.dodisconnect = false;
         return null;
     }
 }
