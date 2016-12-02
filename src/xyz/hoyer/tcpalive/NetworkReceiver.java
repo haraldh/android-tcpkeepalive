@@ -21,8 +21,14 @@ public void onReceive(Context context, Intent intent) {
 			context.startService(PushService.startIntent(context.getApplicationContext()));
 	    } 
 	    else if(networkInfo != null){
-			context.startService(PushService.pingIntent(context.getApplicationContext()));
-	    	Log.i("TCPKeepAlive", "NetworkReceiver ping");
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} finally {
+				context.startService(PushService.pingIntent(context.getApplicationContext()));
+				Log.i("TCPKeepAlive", "NetworkReceiver ping");
+			}
 	    }
 	    else {
 	        Log.i("TCPKeepAlive", "NetworkReceiver lost connection");
